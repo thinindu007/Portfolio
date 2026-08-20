@@ -74,7 +74,7 @@ export default function Hero() {
             {profile.name}
           </motion.h2>
 
-          <h1 className="max-w-5xl font-display text-[13vw] font-medium leading-[0.95] tracking-tight text-ink sm:text-[9vw] md:text-[5vw] lg:text-[4.5vw]">
+          <h1 className="max-w-5xl font-display text-[8vw] font-medium leading-[0.95] tracking-tight text-ink sm:text-[7vw] md:text-[5vw] lg:text-[4.5vw]">
             <RevealWord delay={0.3}>{headline}</RevealWord>
             <br />
             <span className="text-gradient">
