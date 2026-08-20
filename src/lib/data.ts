@@ -34,6 +34,7 @@ export const experience = [
       "Working on Odoo ERP development, customizing modules and implementing business workflows.",
       "Utilized WSO2 API Manager to orchestrate API gateways.",
       "Designed and executed memory-efficient data pipelines.",
+      "Architected and deployed a privacy-first, RAG-based Generative AI HR Assistant utilizing local LLMs (Ollama) and pgvector semantic search.",
     ],
   },
   {
@@ -92,16 +93,39 @@ export type Project = {
   stage: (typeof pipelineStages)[number];
 };
 
-export const projects: Project[] = [
+export const workProjects: Project[] = [
+  {
+    id: "gen-ai-hr-assistant",
+    year: "2025 - Present",
+    title: "Generative AI HR Assistant (RAG Platform)",
+    description:
+      "Architected a privacy-first RAG chatbot using local LLMs (Llama 3.1, Phi-3) via Ollama. Built semantic search with pgvector, a custom dependency-free text chunker, real-time token streaming via SSE, and contextual SSO injection.",
+    stack: ["React.js", "Node.js", "PostgreSQL", "pgvector", "Ollama", "Web Speech API"],
+    metric: "High-accuracy semantic retrieval",
+    stage: "PROD",
+  },
+  {
+    id: "smata-whitelabel",
+    year: "2023 - 2025",
+    title: "SMATA Technologies White-Label Mobile Apps",
+    description:
+      "Built and deployed over 30 white-labeled mobile applications for SMATA Technologies (smata.com). Managed the entire deployment lifecycle including client-specific builds, App Store and Google Play Store management, and release pipelines.",
+    stack: ["React Native", "Fastlane", "App Store Connect", "Google Play Console"],
+    metric: "30+ apps deployed",
+    stage: "PROD",
+  },
+];
+
+export const universityProjects: Project[] = [
   {
     id: "mental-wellness",
     year: "2025",
     title: "AI-Powered Mental Wellness Assistant",
     description:
-      "Research & development on an AI-driven wellness assistant supporting university students in developing countries through intelligent mood tracking and personalized recommendations.",
-    stack: ["React Native", "AI/ML", "Mood Tracking", "Personalization"],
-    metric: "In active R&D",
-    stage: "DEV",
+      "An AI-driven wellness assistant supporting university students in developing countries through intelligent mood tracking, personalized recommendations, and a guided exercise module. Powered by local LLMs.",
+    stack: ["React Native", "AI/ML", "Ollama LLM", "Mood Tracking"],
+    metric: "Completed R&D",
+    stage: "PROD",
   },
   {
     id: "posture-detection",

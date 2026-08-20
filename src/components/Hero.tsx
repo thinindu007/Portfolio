@@ -7,32 +7,7 @@ import { profile } from "../lib/data";
 const headline = "Building software that ships,";
 const headline2 = "not just software that runs.";
 
-function RevealWord({ children, delay }: { children: string; delay: number }) {
-  const words = children.split(" ");
-  return (
-    <>
-      {words.map((word, i) => (
-        <span
-          key={i}
-          className="inline-block overflow-hidden align-bottom mr-[0.2em] last:mr-0"
-        >
-          <motion.span
-            className="inline-block pb-1"
-            initial={{ y: "110%" }}
-            animate={{ y: 0 }}
-            transition={{
-              duration: 0.9,
-              delay: delay + i * 0.04,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
-    </>
-  );
-}
+
 
 export default function Hero() {
   return (
@@ -75,10 +50,10 @@ export default function Hero() {
           </motion.h2>
 
           <h1 className="max-w-5xl font-display text-[8vw] font-medium leading-[0.95] tracking-tight text-ink sm:text-[7vw] md:text-[5vw] lg:text-[4.5vw]">
-            <RevealWord delay={0.3}>{headline}</RevealWord>
+            {headline}
             <br />
             <span className="text-gradient">
-              <RevealWord delay={0.45}>{headline2}</RevealWord>
+              {headline2}
             </span>
           </h1>
 

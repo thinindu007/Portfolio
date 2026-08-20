@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, X } from "lucide-react";
-import { projects, type Project } from "../lib/data";
+import { workProjects, universityProjects, type Project } from "../lib/data";
 import PipelineChip from "./PipelineChip";
 
 function Marquee({ items }: { items: string[] }) {
@@ -50,11 +50,60 @@ export default function Projects() {
           transition={{ duration: 0.7 }}
           className="mb-10 max-w-2xl font-display text-3xl text-ink md:text-4xl"
         >
-          Featured projects
+          Work-Related Projects
+        </motion.h2>
+
+        <div className="mb-16 grid gap-6 md:grid-cols-2">
+          {workProjects.map((p, i) => (
+            <motion.button
+              key={p.id}
+              layoutId={`card-${p.id}`}
+              onClick={() => setActive(p)}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-20px" }}
+              transition={{ duration: 0.6, delay: (i % 2) * 0.1 }}
+              whileHover={{ y: -4 }}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-obsidian-border bg-obsidian-surface/40 p-6 text-left transition-colors hover:border-signal-indigo/50"
+            >
+              <div className="flex items-start justify-between">
+                <span className="font-mono text-xs text-ink-faint">
+                  {p.year}
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-ink-faint transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signal-indigo" />
+              </div>
+              <motion.h3
+                layoutId={`title-${p.id}`}
+                className="mt-4 font-display text-xl text-ink"
+              >
+                {p.title}
+              </motion.h3>
+              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-muted">
+                {p.description}
+              </p>
+              <div className="mt-5 flex items-center justify-between">
+                <span className="font-mono text-xs text-signal-teal">
+                  {p.metric}
+                </span>
+                <PipelineChip stage={p.stage} />
+              </div>
+              <Marquee items={p.stack} />
+            </motion.button>
+          ))}
+        </div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-20px" }}
+          transition={{ duration: 0.7 }}
+          className="mb-10 max-w-2xl font-display text-3xl text-ink md:text-4xl"
+        >
+          University & Personal Projects
         </motion.h2>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {projects.map((p, i) => (
+          {universityProjects.map((p, i) => (
             <motion.button
               key={p.id}
               layoutId={`card-${p.id}`}
