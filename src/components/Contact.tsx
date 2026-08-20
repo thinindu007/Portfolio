@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 import MagneticButton from "./MagneticButton";
-import { references, socials } from "../lib/data";
+import { socials } from "../lib/data";
 
 function FloatingField({
   id,
@@ -115,25 +115,7 @@ export default function Contact() {
               </MagneticButton>
             </div>
 
-            <div className="mt-16">
-              <span className="font-mono text-xs uppercase tracking-[0.15em] text-ink-faint">
-                References
-              </span>
-              <div className="mt-4 flex flex-col gap-4">
-                {references.map((r) => (
-                  <div key={r.name} className="flex items-baseline gap-3">
-                    <span className="text-sm text-ink">{r.name}</span>
-                    <span className="h-px flex-1 border-t border-dashed border-obsidian-border" />
-                    <span className="text-right text-xs text-ink-muted">
-                      {r.title}
-                    </span>
-                  </div>
-                ))}
-                <p className="text-xs text-ink-faint">
-                  Full contact details available on request.
-                </p>
-              </div>
-            </div>
+
           </div>
 
           <motion.form

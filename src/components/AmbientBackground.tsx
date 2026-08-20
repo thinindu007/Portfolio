@@ -10,7 +10,8 @@ type Star = {
   vx: number;
   vy: number;
   hue: number;
-  flareTime: number; // when > 0, star is flaring
+  flareTime: number;
+  parallaxFactor: number; // For scroll parallax effect
 };
 
 type ShootingStar = {
@@ -27,6 +28,20 @@ type ShootingStar = {
 export default function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouse = useRef({ x: -9999, y: -9999 });
+  const scrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollY.current = window.scrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initialize scroll position
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -54,7 +69,6 @@ export default function AmbientBackground() {
     window.addEventListener("resize", resize);
 
     // --- Stars ---
-    // Adjust density based on device to ensure good performance and prevent clutter on small screens
     const density = isMobile ? 7500 : 4500;
     const minStars = isMobile ? 120 : 280;
     const starCount = Math.max(minStars, Math.floor((width * height) / density));
@@ -76,13 +90,16 @@ export default function AmbientBackground() {
         vy: (Math.random() - 0.5) * (isMobile ? 0.005 : 0.008),
         hue: Math.random() < 0.3 ? 220 : Math.random() < 0.5 ? 40 : 0,
         flareTime: 0,
+        // Larger stars (brighter) move faster during scroll to create depth
+        parallaxFactor: isBright 
+          ? Math.random() * 0.4 + 0.3 
+          : Math.random() * 0.15 + 0.05,
       };
     });
 
     // --- Shooting Stars ---
     const shootingStars: ShootingStar[] = [];
     let shootingStarTimer = 0;
-    // Slightly less frequent on mobile
     let nextShootingInterval = (isMobile ? 4000 : 2000) + Math.random() * (isMobile ? 4000 : 3000); 
 
     const spawnShootingStar = () => {
@@ -95,7 +112,8 @@ export default function AmbientBackground() {
       
       shootingStars.push({
         x: startX,
-        y: startY,
+        // Adjust start position relative to current scroll so it spawns on screen
+        y: startY + scrollY.current * 0.2, 
         vx: Math.cos(angle) * speed * direction,
         vy: Math.sin(angle) * speed,
         life: 0,
@@ -149,6 +167,7 @@ export default function AmbientBackground() {
       const mouseGlowRadius = isMobile ? 120 : 220;
       const constellationRadius = isMobile ? 100 : 160;
       const pushRadius = isMobile ? 60 : 100;
+      const currentScroll = scrollY.current;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -175,13 +194,12 @@ export default function AmbientBackground() {
       // --- Trigger random star flare ---
       if (flareTimer > nextFlareInterval) {
         const idx = Math.floor(Math.random() * stars.length);
-        stars[idx].flareTime = 1.0; // start a 1-second flare
+        stars[idx].flareTime = 1.0; 
         flareTimer = 0;
         nextFlareInterval = (isMobile ? 2500 : 1500) + Math.random() * 3000;
       }
 
-      // --- Collect stars near mouse for constellation lines ---
-      const nearMouseStars: Star[] = [];
+      const nearMouseStars: { x: number; y: number }[] = [];
 
       // --- Draw Stars ---
       for (const s of stars) {
@@ -189,11 +207,14 @@ export default function AmbientBackground() {
         s.x += s.vx;
         s.y += s.vy;
 
-        // Wrap around edges
-        if (s.x < -5) s.x = width + 5;
-        if (s.x > width + 5) s.x = -5;
-        if (s.y < -5) s.y = height + 5;
-        if (s.y > height + 5) s.y = -5;
+        // Wrap the base coordinates
+        s.x = (s.x % width + width) % width;
+        s.y = (s.y % height + height) % height;
+
+        // Apply scroll parallax to compute screen coordinates
+        const drawX = s.x;
+        const parallaxY = s.y - currentScroll * s.parallaxFactor;
+        const drawY = (parallaxY % height + height) % height;
 
         // Decay flare
         if (s.flareTime > 0) {
@@ -204,38 +225,36 @@ export default function AmbientBackground() {
         const twinkle = Math.sin(time * s.twinkleSpeed + s.twinkleOffset);
         let alpha = s.baseAlpha + twinkle * s.baseAlpha * 0.5;
 
-        // Flare boost — smooth pulse up then down
+        // Flare boost
         let flareBoost = 0;
         if (s.flareTime > 0) {
-          const flareProgress = 1 - s.flareTime; // 0 to 1
+          const flareProgress = 1 - s.flareTime;
           flareBoost = Math.sin(flareProgress * Math.PI) * 0.7;
         }
 
         alpha = Math.max(0.02, Math.min(1, alpha + flareBoost));
 
-        // Mouse/Touch proximity glow + gentle push
-        const dxm = mouse.current.x - s.x;
-        const dym = mouse.current.y - s.y;
+        // Mouse proximity calculations using final draw coordinates
+        const dxm = mouse.current.x - drawX;
+        const dym = mouse.current.y - drawY;
         const dm = Math.sqrt(dxm * dxm + dym * dym);
         const mouseBoost = dm < mouseGlowRadius ? (1 - dm / mouseGlowRadius) * 0.6 : 0;
 
-        // Gentle push: stars drift slightly away from cursor/touch
+        // Gentle push away from cursor
         if (dm < pushRadius && dm > 1) {
           const pushForce = (1 - dm / pushRadius) * 0.12;
-          s.x -= (dxm / dm) * pushForce;
+          s.x -= (dxm / dm) * pushForce; // Update base coordinates
           s.y -= (dym / dm) * pushForce;
         }
 
-        // Collect for constellation
         if (dm < constellationRadius) {
-          nearMouseStars.push(s);
+          nearMouseStars.push({ x: drawX, y: drawY });
         }
 
         const finalAlpha = Math.min(1, alpha + mouseBoost);
         const flareRadiusBoost = flareBoost * (isMobile ? 1.0 : 1.5);
         const finalRadius = s.r + (mouseBoost > 0 ? mouseBoost * 0.8 : 0) + flareRadiusBoost;
 
-        // Color
         if (s.hue === 0) {
           ctx.fillStyle = `rgba(243, 242, 238, ${finalAlpha})`;
         } else if (s.hue === 220) {
@@ -245,13 +264,13 @@ export default function AmbientBackground() {
         }
 
         ctx.beginPath();
-        ctx.arc(s.x, s.y, finalRadius, 0, Math.PI * 2);
+        ctx.arc(drawX, drawY, finalRadius, 0, Math.PI * 2);
         ctx.fill();
 
         // Glow halo for brighter stars or flaring stars
         if ((s.r > (isMobile ? 0.8 : 1.0) && finalAlpha > 0.4) || flareBoost > 0.2) {
           const glowRadius = finalRadius * (flareBoost > 0.2 ? (isMobile ? 4 : 6) : 4);
-          const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowRadius);
+          const glow = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, glowRadius);
           if (s.hue === 220) {
             glow.addColorStop(0, `rgba(140, 170, 255, ${finalAlpha * 0.15})`);
           } else if (s.hue === 40) {
@@ -262,14 +281,14 @@ export default function AmbientBackground() {
           glow.addColorStop(1, "transparent");
           ctx.fillStyle = glow;
           ctx.beginPath();
-          ctx.arc(s.x, s.y, glowRadius, 0, Math.PI * 2);
+          ctx.arc(drawX, drawY, glowRadius, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
       // --- Constellation lines near cursor/touch ---
       if (nearMouseStars.length > 1) {
-        const maxLinks = isMobile ? 4 : 6; // slightly fewer lines on mobile to prevent clutter
+        const maxLinks = isMobile ? 4 : 6;
         let links = 0;
         for (let i = 0; i < nearMouseStars.length && links < maxLinks; i++) {
           const a = nearMouseStars[i];
@@ -330,14 +349,17 @@ export default function AmbientBackground() {
           continue;
         }
 
+        // Apply a subtle parallax to shooting stars as well
+        const drawY = ss.y - currentScroll * 0.2;
+
         // Trail
         const speed = Math.sqrt(ss.vx * ss.vx + ss.vy * ss.vy);
         const dirX = ss.vx / speed;
         const dirY = ss.vy / speed;
         const tailX = ss.x - dirX * ss.length * fadeOut;
-        const tailY = ss.y - dirY * ss.length * fadeOut;
+        const tailY = drawY - dirY * ss.length * fadeOut;
 
-        const trailGrad = ctx.createLinearGradient(ss.x, ss.y, tailX, tailY);
+        const trailGrad = ctx.createLinearGradient(ss.x, drawY, tailX, tailY);
         trailGrad.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
         trailGrad.addColorStop(0.2, `rgba(210, 225, 255, ${opacity * 0.5})`);
         trailGrad.addColorStop(1, "rgba(200, 220, 255, 0)");
@@ -346,23 +368,23 @@ export default function AmbientBackground() {
         ctx.lineWidth = ss.width;
         ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.moveTo(ss.x, ss.y);
+        ctx.moveTo(ss.x, drawY);
         ctx.lineTo(tailX, tailY);
         ctx.stroke();
 
         // Bright head glow
-        const headGlow = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, isMobile ? 3 : 4);
+        const headGlow = ctx.createRadialGradient(ss.x, drawY, 0, ss.x, drawY, isMobile ? 3 : 4);
         headGlow.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.6})`);
         headGlow.addColorStop(1, "transparent");
         ctx.fillStyle = headGlow;
         ctx.beginPath();
-        ctx.arc(ss.x, ss.y, isMobile ? 3 : 4, 0, Math.PI * 2);
+        ctx.arc(ss.x, drawY, isMobile ? 3 : 4, 0, Math.PI * 2);
         ctx.fill();
 
         // Solid head dot
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(ss.x, ss.y, ss.width * 0.7, 0, Math.PI * 2);
+        ctx.arc(ss.x, drawY, ss.width * 0.7, 0, Math.PI * 2);
         ctx.fill();
       }
 

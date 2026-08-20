@@ -163,16 +163,6 @@ export const skills = {
   Tools: ["Xcode", "Android Studio", "Git", "Jira", "Figma"],
 } as const;
 
-export const references = [
-  {
-    name: "Romani Rupasinghe",
-    title: "Chief Technology Officer, VS ONE WORLD",
-  },
-  {
-    name: "Sameera Chathuranga",
-    title: "Senior Mobile Lead, Maytech Technologies",
-  },
-] as const;
 
 export const socials = {
   github: "https://github.com/",
