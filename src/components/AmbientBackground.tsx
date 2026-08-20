@@ -36,11 +36,14 @@ export default function AmbientBackground() {
 
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let isMobile = width < 768;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
+      isMobile = width < 768;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
@@ -51,22 +54,26 @@ export default function AmbientBackground() {
     window.addEventListener("resize", resize);
 
     // --- Stars ---
-    const starCount = Math.max(280, Math.floor((width * height) / 4500));
+    // Adjust density based on device to ensure good performance and prevent clutter on small screens
+    const density = isMobile ? 7500 : 4500;
+    const minStars = isMobile ? 120 : 280;
+    const starCount = Math.max(minStars, Math.floor((width * height) / density));
+    
     const stars: Star[] = Array.from({ length: starCount }).map(() => {
       const isBright = Math.random() < 0.06;
       return {
         x: Math.random() * width,
         y: Math.random() * height,
         r: isBright
-          ? Math.random() * 1.6 + 1.0
-          : Math.random() * 0.9 + 0.2,
+          ? Math.random() * (isMobile ? 1.2 : 1.6) + (isMobile ? 0.8 : 1.0)
+          : Math.random() * (isMobile ? 0.7 : 0.9) + 0.2,
         baseAlpha: isBright
           ? Math.random() * 0.4 + 0.55
           : Math.random() * 0.35 + 0.08,
         twinkleSpeed: Math.random() * 0.8 + 0.3,
         twinkleOffset: Math.random() * Math.PI * 2,
-        vx: (Math.random() - 0.5) * 0.015,
-        vy: (Math.random() - 0.5) * 0.008,
+        vx: (Math.random() - 0.5) * (isMobile ? 0.01 : 0.015),
+        vy: (Math.random() - 0.5) * (isMobile ? 0.005 : 0.008),
         hue: Math.random() < 0.3 ? 220 : Math.random() < 0.5 ? 40 : 0,
         flareTime: 0,
       };
@@ -75,15 +82,17 @@ export default function AmbientBackground() {
     // --- Shooting Stars ---
     const shootingStars: ShootingStar[] = [];
     let shootingStarTimer = 0;
-    let nextShootingInterval = 2000 + Math.random() * 3000; // 2-5 seconds
+    // Slightly less frequent on mobile
+    let nextShootingInterval = (isMobile ? 4000 : 2000) + Math.random() * (isMobile ? 4000 : 3000); 
 
     const spawnShootingStar = () => {
       const startX = Math.random() * width * 0.85 + width * 0.05;
       const startY = Math.random() * height * 0.5;
       const angle = (Math.random() * 35 + 12) * (Math.PI / 180);
-      const direction = Math.random() < 0.7 ? 1 : -1; // mostly left-to-right
-      const speed = Math.random() * 5 + 4;
-      const isLarge = Math.random() < 0.25; // 25% are larger, more dramatic
+      const direction = Math.random() < 0.7 ? 1 : -1;
+      const speed = (Math.random() * 5 + 4) * (isMobile ? 0.8 : 1);
+      const isLarge = Math.random() < 0.25;
+      
       shootingStars.push({
         x: startX,
         y: startY,
@@ -91,16 +100,16 @@ export default function AmbientBackground() {
         vy: Math.sin(angle) * speed,
         life: 0,
         maxLife: isLarge ? 55 + Math.random() * 25 : 35 + Math.random() * 25,
-        length: isLarge ? 100 + Math.random() * 80 : 50 + Math.random() * 60,
-        width: isLarge ? 2.0 : 1.2,
+        length: (isLarge ? 100 + Math.random() * 80 : 50 + Math.random() * 60) * (isMobile ? 0.6 : 1),
+        width: isLarge ? (isMobile ? 1.5 : 2.0) : (isMobile ? 0.8 : 1.2),
       });
     };
 
     // --- Random star flares ---
     let flareTimer = 0;
-    let nextFlareInterval = 1500 + Math.random() * 3000;
+    let nextFlareInterval = (isMobile ? 2500 : 1500) + Math.random() * 3000;
 
-    // --- Mouse ---
+    // --- Mouse & Touch ---
     const onMove = (e: MouseEvent) => {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
@@ -109,20 +118,37 @@ export default function AmbientBackground() {
       mouse.current.x = -9999;
       mouse.current.y = -9999;
     };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouse.current.x = e.touches[0].clientX;
+        mouse.current.y = e.touches[0].clientY;
+      }
+    };
+    const onTouchEnd = () => {
+      mouse.current.x = -9999;
+      mouse.current.y = -9999;
+    };
+
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseleave", onLeave);
+    window.addEventListener("touchstart", onTouchMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd);
+    window.addEventListener("touchcancel", onTouchEnd);
 
     let raf = 0;
     let time = 0;
-    const mouseGlowRadius = 220;
-    const constellationRadius = 160; // radius to draw constellation lines near cursor
-    const pushRadius = 100; // stars gently pushed away from cursor
 
     const tick = () => {
       const dt = 0.016;
       time += dt;
       shootingStarTimer += 16;
       flareTimer += 16;
+
+      const mouseGlowRadius = isMobile ? 120 : 220;
+      const constellationRadius = isMobile ? 100 : 160;
+      const pushRadius = isMobile ? 60 : 100;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -151,7 +177,7 @@ export default function AmbientBackground() {
         const idx = Math.floor(Math.random() * stars.length);
         stars[idx].flareTime = 1.0; // start a 1-second flare
         flareTimer = 0;
-        nextFlareInterval = 1500 + Math.random() * 3000;
+        nextFlareInterval = (isMobile ? 2500 : 1500) + Math.random() * 3000;
       }
 
       // --- Collect stars near mouse for constellation lines ---
@@ -187,13 +213,13 @@ export default function AmbientBackground() {
 
         alpha = Math.max(0.02, Math.min(1, alpha + flareBoost));
 
-        // Mouse proximity glow + gentle push
+        // Mouse/Touch proximity glow + gentle push
         const dxm = mouse.current.x - s.x;
         const dym = mouse.current.y - s.y;
         const dm = Math.sqrt(dxm * dxm + dym * dym);
         const mouseBoost = dm < mouseGlowRadius ? (1 - dm / mouseGlowRadius) * 0.6 : 0;
 
-        // Gentle push: stars drift slightly away from cursor
+        // Gentle push: stars drift slightly away from cursor/touch
         if (dm < pushRadius && dm > 1) {
           const pushForce = (1 - dm / pushRadius) * 0.12;
           s.x -= (dxm / dm) * pushForce;
@@ -206,7 +232,7 @@ export default function AmbientBackground() {
         }
 
         const finalAlpha = Math.min(1, alpha + mouseBoost);
-        const flareRadiusBoost = flareBoost * 1.5;
+        const flareRadiusBoost = flareBoost * (isMobile ? 1.0 : 1.5);
         const finalRadius = s.r + (mouseBoost > 0 ? mouseBoost * 0.8 : 0) + flareRadiusBoost;
 
         // Color
@@ -223,8 +249,8 @@ export default function AmbientBackground() {
         ctx.fill();
 
         // Glow halo for brighter stars or flaring stars
-        if ((s.r > 1.0 && finalAlpha > 0.4) || flareBoost > 0.2) {
-          const glowRadius = finalRadius * (flareBoost > 0.2 ? 6 : 4);
+        if ((s.r > (isMobile ? 0.8 : 1.0) && finalAlpha > 0.4) || flareBoost > 0.2) {
+          const glowRadius = finalRadius * (flareBoost > 0.2 ? (isMobile ? 4 : 6) : 4);
           const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowRadius);
           if (s.hue === 220) {
             glow.addColorStop(0, `rgba(140, 170, 255, ${finalAlpha * 0.15})`);
@@ -241,9 +267,9 @@ export default function AmbientBackground() {
         }
       }
 
-      // --- Constellation lines near cursor ---
+      // --- Constellation lines near cursor/touch ---
       if (nearMouseStars.length > 1) {
-        const maxLinks = 6; // don't draw too many lines
+        const maxLinks = isMobile ? 4 : 6; // slightly fewer lines on mobile to prevent clutter
         let links = 0;
         for (let i = 0; i < nearMouseStars.length && links < maxLinks; i++) {
           const a = nearMouseStars[i];
@@ -266,7 +292,7 @@ export default function AmbientBackground() {
         }
       }
 
-      // --- Mouse cursor glow ---
+      // --- Mouse/Touch cursor glow ---
       if (mouse.current.x > -999) {
         const cursorGlow = ctx.createRadialGradient(
           mouse.current.x, mouse.current.y, 0,
@@ -285,7 +311,7 @@ export default function AmbientBackground() {
       if (shootingStarTimer > nextShootingInterval) {
         spawnShootingStar();
         shootingStarTimer = 0;
-        nextShootingInterval = 2000 + Math.random() * 3000;
+        nextShootingInterval = (isMobile ? 4000 : 2000) + Math.random() * (isMobile ? 4000 : 3000);
       }
 
       for (let i = shootingStars.length - 1; i >= 0; i--) {
@@ -325,12 +351,12 @@ export default function AmbientBackground() {
         ctx.stroke();
 
         // Bright head glow
-        const headGlow = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, 4);
+        const headGlow = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, isMobile ? 3 : 4);
         headGlow.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.6})`);
         headGlow.addColorStop(1, "transparent");
         ctx.fillStyle = headGlow;
         ctx.beginPath();
-        ctx.arc(ss.x, ss.y, 4, 0, Math.PI * 2);
+        ctx.arc(ss.x, ss.y, isMobile ? 3 : 4, 0, Math.PI * 2);
         ctx.fill();
 
         // Solid head dot
@@ -349,14 +375,18 @@ export default function AmbientBackground() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("touchstart", onTouchMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
     };
   }, []);
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-obsidian" />
-      <canvas ref={canvasRef} className="absolute inset-0" />
-      <div className="absolute inset-0 noise relative" />
+      <canvas ref={canvasRef} className="absolute inset-0 touch-none" />
+      <div className="absolute inset-0 noise relative pointer-events-none" />
     </div>
   );
 }
