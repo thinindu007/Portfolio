@@ -24,7 +24,7 @@ export default function About() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
           className="mb-16 flex items-center gap-4"
         >
@@ -37,7 +37,7 @@ export default function About() {
         <motion.p
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl font-display text-2xl font-normal leading-snug text-ink md:text-4xl"
         >
@@ -50,7 +50,7 @@ export default function About() {
           variants={container}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           className="mt-20 grid gap-8 md:grid-cols-3"
         >
           {profile.philosophy.map((p, i) => (

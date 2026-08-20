@@ -45,6 +45,23 @@ export default function Hero() {
             </span>
           </motion.div>
 
+          <motion.h2
+            initial={{ opacity: 0, y: 10, color: "#6e7bff" }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              color: ["#6e7bff", "#b9bdf7", "#38bdf8", "#6e7bff"]
+            }}
+            transition={{ 
+              opacity: { duration: 0.6, delay: 0.25 },
+              y: { duration: 0.6, delay: 0.25 },
+              color: { duration: 8, repeat: Infinity, ease: "easeInOut" }
+            }}
+            className="mb-4 font-display text-2xl font-medium md:text-3xl"
+          >
+            {profile.name}
+          </motion.h2>
+
           <h1 className="max-w-5xl font-display text-[13vw] font-medium leading-[0.95] tracking-tight text-ink sm:text-[9vw] md:text-[5vw] lg:text-[4.5vw]">
             <RevealWord delay={0.3}>{headline}</RevealWord>
             <br />
@@ -91,7 +108,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
           transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-xs md:w-1/2 md:max-w-sm lg:max-w-md xl:max-w-lg"
+          className="w-full max-w-xs md:w-1/2 md:max-w-sm lg:max-w-md xl:max-w-lg md:-translate-x-24 lg:-translate-x-40 xl:-translate-x-48"
         >
           <div className="relative aspect-square w-full">
             <div className="absolute inset-0 rounded-full bg-signal-indigo/20 blur-3xl"></div>

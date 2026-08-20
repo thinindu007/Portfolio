@@ -22,7 +22,7 @@ export default function Timeline() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
           className="mb-16 flex items-center gap-4"
         >
@@ -35,7 +35,7 @@ export default function Timeline() {
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
           className="mb-16 max-w-2xl font-display text-3xl text-ink md:text-4xl"
         >
@@ -55,7 +55,7 @@ export default function Timeline() {
                 key={role.id}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
+                viewport={{ once: true, margin: "-20px" }}
                 transition={{ duration: 0.6, delay: i * 0.05 }}
                 className="relative"
               >
@@ -92,7 +92,7 @@ export default function Timeline() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
           className="mt-20 grid gap-6 border-t border-obsidian-border pt-14 md:grid-cols-2"
         >

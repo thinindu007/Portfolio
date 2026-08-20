@@ -1,6 +1,6 @@
 export const profile = {
   name: "Thinindu Akuranthilake",
-  role: "Trainee Software Engineer",
+  role: "Associate Software Engineer",
   focus: "Mobile & Full-Stack Systems",
   location: "Colombo, Sri Lanka",
   summary:
@@ -27,7 +27,7 @@ export const experience = [
   {
     id: "vs-one-world",
     company: "VS ONE WORLD (Pvt) Ltd",
-    role: "Trainee Software Engineer",
+    role: "Associate Software Engineer",
     period: "Dec 2025 — Present",
     stage: "PROD",
     points: [
@@ -40,7 +40,7 @@ export const experience = [
     id: "swivel-group",
     company: "Swivel Group",
     link: "swivelgroup.com.au",
-    role: "Intern Software Engineer",
+    role: "Trainee Software Engineer",
     period: "May 2023 — Nov 2025",
     stage: "UAT",
     points: [
@@ -165,7 +165,7 @@ export const skills = {
 
 
 export const socials = {
-  github: "https://github.com/",
-  linkedin: "https://linkedin.com/",
-  email: "mailto:hello@example.com",
+  github: "https://github.com/thinindu007",
+  linkedin: "https://www.linkedin.com/in/thinindu-akuranthilake-231110266/",
+  email: "mailto:thinindu2000@gmail.com",
 };

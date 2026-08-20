@@ -56,7 +56,7 @@ export default function Contact() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
           className="mb-16 flex items-center gap-4"
         >
@@ -71,7 +71,7 @@ export default function Contact() {
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-20px" }}
               transition={{ duration: 0.7 }}
               className="max-w-md font-display text-3xl leading-tight text-ink md:text-4xl"
             >
@@ -121,7 +121,7 @@ export default function Contact() {
           <motion.form
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-20px" }}
             transition={{ duration: 0.7, delay: 0.1 }}
             onSubmit={(e) => e.preventDefault()}
             className="glass flex flex-col gap-8 rounded-2xl p-8"

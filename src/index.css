@@ -55,11 +55,19 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
   .text-gradient {
-    background: linear-gradient(120deg, #f3f2ee 0%, #b9bdf7 50%, #6e7bff 100%);
+    background: linear-gradient(120deg, #f3f2ee 0%, #b9bdf7 40%, #6e7bff 80%, #38bdf8 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    animation: gradient-shift 6s ease-in-out infinite;
   }
 
   .noise::before {
