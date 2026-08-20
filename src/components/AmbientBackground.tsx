@@ -1,11 +1,27 @@
 import { useEffect, useRef } from "react";
 
-type Particle = {
+type Star = {
+  x: number;
+  y: number;
+  r: number;
+  baseAlpha: number;
+  twinkleSpeed: number;
+  twinkleOffset: number;
+  vx: number;
+  vy: number;
+  hue: number;
+  flareTime: number; // when > 0, star is flaring
+};
+
+type ShootingStar = {
   x: number;
   y: number;
   vx: number;
   vy: number;
-  r: number;
+  life: number;
+  maxLife: number;
+  length: number;
+  width: number;
 };
 
 export default function AmbientBackground() {
@@ -34,15 +50,57 @@ export default function AmbientBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    const count = Math.min(70, Math.floor((width * height) / 22000));
-    const particles: Particle[] = Array.from({ length: count }).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.15,
-      vy: (Math.random() - 0.5) * 0.15,
-      r: Math.random() * 1.4 + 0.4,
-    }));
+    // --- Stars ---
+    const starCount = Math.max(280, Math.floor((width * height) / 4500));
+    const stars: Star[] = Array.from({ length: starCount }).map(() => {
+      const isBright = Math.random() < 0.06;
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: isBright
+          ? Math.random() * 1.6 + 1.0
+          : Math.random() * 0.9 + 0.2,
+        baseAlpha: isBright
+          ? Math.random() * 0.4 + 0.55
+          : Math.random() * 0.35 + 0.08,
+        twinkleSpeed: Math.random() * 0.8 + 0.3,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        vx: (Math.random() - 0.5) * 0.015,
+        vy: (Math.random() - 0.5) * 0.008,
+        hue: Math.random() < 0.3 ? 220 : Math.random() < 0.5 ? 40 : 0,
+        flareTime: 0,
+      };
+    });
 
+    // --- Shooting Stars ---
+    const shootingStars: ShootingStar[] = [];
+    let shootingStarTimer = 0;
+    let nextShootingInterval = 2000 + Math.random() * 3000; // 2-5 seconds
+
+    const spawnShootingStar = () => {
+      const startX = Math.random() * width * 0.85 + width * 0.05;
+      const startY = Math.random() * height * 0.5;
+      const angle = (Math.random() * 35 + 12) * (Math.PI / 180);
+      const direction = Math.random() < 0.7 ? 1 : -1; // mostly left-to-right
+      const speed = Math.random() * 5 + 4;
+      const isLarge = Math.random() < 0.25; // 25% are larger, more dramatic
+      shootingStars.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed * direction,
+        vy: Math.sin(angle) * speed,
+        life: 0,
+        maxLife: isLarge ? 55 + Math.random() * 25 : 35 + Math.random() * 25,
+        length: isLarge ? 100 + Math.random() * 80 : 50 + Math.random() * 60,
+        width: isLarge ? 2.0 : 1.2,
+      });
+    };
+
+    // --- Random star flares ---
+    let flareTimer = 0;
+    let nextFlareInterval = 1500 + Math.random() * 3000;
+
+    // --- Mouse ---
     const onMove = (e: MouseEvent) => {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
@@ -55,60 +113,230 @@ export default function AmbientBackground() {
     window.addEventListener("mouseleave", onLeave);
 
     let raf = 0;
-    const linkDist = 130;
-    const mouseDist = 160;
+    let time = 0;
+    const mouseGlowRadius = 220;
+    const constellationRadius = 160; // radius to draw constellation lines near cursor
+    const pushRadius = 100; // stars gently pushed away from cursor
 
     const tick = () => {
+      const dt = 0.016;
+      time += dt;
+      shootingStarTimer += 16;
+      flareTimer += 16;
+
       ctx.clearRect(0, 0, width, height);
 
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
+      // --- Subtle nebula glow ---
+      const nebulaGrad = ctx.createRadialGradient(
+        width * 0.3, height * 0.25, 0,
+        width * 0.3, height * 0.25, width * 0.5
+      );
+      nebulaGrad.addColorStop(0, "rgba(60, 40, 100, 0.04)");
+      nebulaGrad.addColorStop(0.5, "rgba(30, 50, 90, 0.02)");
+      nebulaGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = nebulaGrad;
+      ctx.fillRect(0, 0, width, height);
 
-        const dx = mouse.current.x - p.x;
-        const dy = mouse.current.y - p.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < mouseDist) {
-          const force = (1 - d / mouseDist) * 0.03;
-          p.vx -= dx * force * 0.02;
-          p.vy -= dy * force * 0.02;
+      const nebulaGrad2 = ctx.createRadialGradient(
+        width * 0.75, height * 0.15, 0,
+        width * 0.75, height * 0.15, width * 0.35
+      );
+      nebulaGrad2.addColorStop(0, "rgba(40, 60, 120, 0.03)");
+      nebulaGrad2.addColorStop(1, "transparent");
+      ctx.fillStyle = nebulaGrad2;
+      ctx.fillRect(0, 0, width, height);
+
+      // --- Trigger random star flare ---
+      if (flareTimer > nextFlareInterval) {
+        const idx = Math.floor(Math.random() * stars.length);
+        stars[idx].flareTime = 1.0; // start a 1-second flare
+        flareTimer = 0;
+        nextFlareInterval = 1500 + Math.random() * 3000;
+      }
+
+      // --- Collect stars near mouse for constellation lines ---
+      const nearMouseStars: Star[] = [];
+
+      // --- Draw Stars ---
+      for (const s of stars) {
+        // Slow drift
+        s.x += s.vx;
+        s.y += s.vy;
+
+        // Wrap around edges
+        if (s.x < -5) s.x = width + 5;
+        if (s.x > width + 5) s.x = -5;
+        if (s.y < -5) s.y = height + 5;
+        if (s.y > height + 5) s.y = -5;
+
+        // Decay flare
+        if (s.flareTime > 0) {
+          s.flareTime = Math.max(0, s.flareTime - dt);
+        }
+
+        // Twinkle
+        const twinkle = Math.sin(time * s.twinkleSpeed + s.twinkleOffset);
+        let alpha = s.baseAlpha + twinkle * s.baseAlpha * 0.5;
+
+        // Flare boost — smooth pulse up then down
+        let flareBoost = 0;
+        if (s.flareTime > 0) {
+          const flareProgress = 1 - s.flareTime; // 0 to 1
+          flareBoost = Math.sin(flareProgress * Math.PI) * 0.7;
+        }
+
+        alpha = Math.max(0.02, Math.min(1, alpha + flareBoost));
+
+        // Mouse proximity glow + gentle push
+        const dxm = mouse.current.x - s.x;
+        const dym = mouse.current.y - s.y;
+        const dm = Math.sqrt(dxm * dxm + dym * dym);
+        const mouseBoost = dm < mouseGlowRadius ? (1 - dm / mouseGlowRadius) * 0.6 : 0;
+
+        // Gentle push: stars drift slightly away from cursor
+        if (dm < pushRadius && dm > 1) {
+          const pushForce = (1 - dm / pushRadius) * 0.12;
+          s.x -= (dxm / dm) * pushForce;
+          s.y -= (dym / dm) * pushForce;
+        }
+
+        // Collect for constellation
+        if (dm < constellationRadius) {
+          nearMouseStars.push(s);
+        }
+
+        const finalAlpha = Math.min(1, alpha + mouseBoost);
+        const flareRadiusBoost = flareBoost * 1.5;
+        const finalRadius = s.r + (mouseBoost > 0 ? mouseBoost * 0.8 : 0) + flareRadiusBoost;
+
+        // Color
+        if (s.hue === 0) {
+          ctx.fillStyle = `rgba(243, 242, 238, ${finalAlpha})`;
+        } else if (s.hue === 220) {
+          ctx.fillStyle = `rgba(190, 210, 255, ${finalAlpha})`;
+        } else {
+          ctx.fillStyle = `rgba(255, 235, 200, ${finalAlpha})`;
+        }
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, finalRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glow halo for brighter stars or flaring stars
+        if ((s.r > 1.0 && finalAlpha > 0.4) || flareBoost > 0.2) {
+          const glowRadius = finalRadius * (flareBoost > 0.2 ? 6 : 4);
+          const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowRadius);
+          if (s.hue === 220) {
+            glow.addColorStop(0, `rgba(140, 170, 255, ${finalAlpha * 0.15})`);
+          } else if (s.hue === 40) {
+            glow.addColorStop(0, `rgba(255, 220, 160, ${finalAlpha * 0.12})`);
+          } else {
+            glow.addColorStop(0, `rgba(243, 242, 238, ${finalAlpha * 0.12})`);
+          }
+          glow.addColorStop(1, "transparent");
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, glowRadius, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
 
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < linkDist) {
-            ctx.strokeStyle = `rgba(110,123,255,${0.09 * (1 - dist / linkDist)})`;
-            ctx.lineWidth = 0.6;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
+      // --- Constellation lines near cursor ---
+      if (nearMouseStars.length > 1) {
+        const maxLinks = 6; // don't draw too many lines
+        let links = 0;
+        for (let i = 0; i < nearMouseStars.length && links < maxLinks; i++) {
+          const a = nearMouseStars[i];
+          for (let j = i + 1; j < nearMouseStars.length && links < maxLinks; j++) {
+            const b = nearMouseStars[j];
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < constellationRadius * 0.9) {
+              const lineAlpha = 0.12 * (1 - dist / (constellationRadius * 0.9));
+              ctx.strokeStyle = `rgba(150, 170, 255, ${lineAlpha})`;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+              links++;
+            }
           }
         }
+      }
 
-        const dxm = mouse.current.x - a.x;
-        const dym = mouse.current.y - a.y;
-        const dm = Math.sqrt(dxm * dxm + dym * dym);
-        if (dm < mouseDist) {
-          ctx.strokeStyle = `rgba(76,217,192,${0.18 * (1 - dm / mouseDist)})`;
-          ctx.lineWidth = 0.7;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(mouse.current.x, mouse.current.y);
-          ctx.stroke();
+      // --- Mouse cursor glow ---
+      if (mouse.current.x > -999) {
+        const cursorGlow = ctx.createRadialGradient(
+          mouse.current.x, mouse.current.y, 0,
+          mouse.current.x, mouse.current.y, mouseGlowRadius
+        );
+        cursorGlow.addColorStop(0, "rgba(100, 130, 255, 0.035)");
+        cursorGlow.addColorStop(0.4, "rgba(80, 110, 220, 0.018)");
+        cursorGlow.addColorStop(1, "transparent");
+        ctx.fillStyle = cursorGlow;
+        ctx.beginPath();
+        ctx.arc(mouse.current.x, mouse.current.y, mouseGlowRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // --- Shooting Stars ---
+      if (shootingStarTimer > nextShootingInterval) {
+        spawnShootingStar();
+        shootingStarTimer = 0;
+        nextShootingInterval = 2000 + Math.random() * 3000;
+      }
+
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const ss = shootingStars[i];
+        ss.x += ss.vx;
+        ss.y += ss.vy;
+        ss.life++;
+
+        const progress = ss.life / ss.maxLife;
+        const fadeIn = Math.min(1, progress * 5);
+        const fadeOut = 1 - Math.pow(progress, 2);
+        const opacity = fadeIn * fadeOut * 0.85;
+
+        if (opacity <= 0 || ss.life > ss.maxLife) {
+          shootingStars.splice(i, 1);
+          continue;
         }
 
-        ctx.fillStyle = "rgba(243,242,238,0.45)";
+        // Trail
+        const speed = Math.sqrt(ss.vx * ss.vx + ss.vy * ss.vy);
+        const dirX = ss.vx / speed;
+        const dirY = ss.vy / speed;
+        const tailX = ss.x - dirX * ss.length * fadeOut;
+        const tailY = ss.y - dirY * ss.length * fadeOut;
+
+        const trailGrad = ctx.createLinearGradient(ss.x, ss.y, tailX, tailY);
+        trailGrad.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+        trailGrad.addColorStop(0.2, `rgba(210, 225, 255, ${opacity * 0.5})`);
+        trailGrad.addColorStop(1, "rgba(200, 220, 255, 0)");
+
+        ctx.strokeStyle = trailGrad;
+        ctx.lineWidth = ss.width;
+        ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        ctx.moveTo(ss.x, ss.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+
+        // Bright head glow
+        const headGlow = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, 4);
+        headGlow.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.6})`);
+        headGlow.addColorStop(1, "transparent");
+        ctx.fillStyle = headGlow;
+        ctx.beginPath();
+        ctx.arc(ss.x, ss.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Solid head dot
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(ss.x, ss.y, ss.width * 0.7, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -127,18 +355,6 @@ export default function AmbientBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-obsidian" />
-      <div
-        className="absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage:
-            "radial-gradient(ellipse 60% 50% at 50% 20%, black, transparent 75%)",
-          WebkitMaskImage:
-            "radial-gradient(ellipse 60% 50% at 50% 20%, black, transparent 75%)",
-        }}
-      />
       <canvas ref={canvasRef} className="absolute inset-0" />
       <div className="absolute inset-0 noise relative" />
     </div>
