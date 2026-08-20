@@ -96,7 +96,7 @@ export type Project = {
 export const workProjects: Project[] = [
   {
     id: "gen-ai-hr-assistant",
-    year: "2025 - Present",
+    year: "2025 - 2025",
     title: "Generative AI HR Assistant (RAG Platform)",
     description:
       "Architected a privacy-first RAG chatbot using local LLMs (Llama 3.1, Phi-3) via Ollama. Built semantic search with pgvector, a custom dependency-free text chunker, real-time token streaming via SSE, and contextual SSO injection.",
