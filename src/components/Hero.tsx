@@ -133,14 +133,7 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.3 }}
-        className="absolute bottom-10 left-6 hidden font-mono text-[11px] text-ink-faint md:block md:left-12"
-      >
-        {profile.location} · GMT+5:30
-      </motion.div>
+
     </section>
   );
 }
