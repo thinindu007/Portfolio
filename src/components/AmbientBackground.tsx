@@ -69,26 +69,32 @@ export default function AmbientBackground() {
     window.addEventListener("resize", resize);
 
     // --- Stars ---
-    const density = isMobile ? 7500 : 4500;
-    const minStars = isMobile ? 120 : 280;
+    const density = isMobile ? 3000 : 1800;
+    const minStars = isMobile ? 300 : 700;
     const starCount = Math.max(minStars, Math.floor((width * height) / density));
     
     const stars: Star[] = Array.from({ length: starCount }).map(() => {
-      const isBright = Math.random() < 0.06;
+      const roll = Math.random();
+      const isBright = roll < 0.1;
+      const isMedium = roll >= 0.1 && roll < 0.3;
       return {
         x: Math.random() * width,
         y: Math.random() * height,
         r: isBright
-          ? Math.random() * (isMobile ? 1.2 : 1.6) + (isMobile ? 0.8 : 1.0)
-          : Math.random() * (isMobile ? 0.7 : 0.9) + 0.2,
+          ? Math.random() * (isMobile ? 1.4 : 1.8) + (isMobile ? 0.9 : 1.1)
+          : isMedium
+          ? Math.random() * (isMobile ? 0.9 : 1.1) + 0.4
+          : Math.random() * (isMobile ? 0.5 : 0.7) + 0.15,
         baseAlpha: isBright
           ? Math.random() * 0.4 + 0.55
-          : Math.random() * 0.35 + 0.08,
+          : isMedium
+          ? Math.random() * 0.3 + 0.25
+          : Math.random() * 0.3 + 0.05,
         twinkleSpeed: Math.random() * 0.8 + 0.3,
         twinkleOffset: Math.random() * Math.PI * 2,
         vx: (Math.random() - 0.5) * (isMobile ? 0.01 : 0.015),
         vy: (Math.random() - 0.5) * (isMobile ? 0.005 : 0.008),
-        hue: Math.random() < 0.3 ? 220 : Math.random() < 0.5 ? 40 : 0,
+        hue: Math.random() < 0.2 ? 220 : Math.random() < 0.35 ? 40 : Math.random() < 0.45 ? 350 : 0,
         flareTime: 0,
         // Larger stars (brighter) move faster during scroll to create depth
         parallaxFactor: isBright 
@@ -176,8 +182,8 @@ export default function AmbientBackground() {
         width * 0.3, height * 0.25, 0,
         width * 0.3, height * 0.25, width * 0.5
       );
-      nebulaGrad.addColorStop(0, "rgba(60, 40, 100, 0.04)");
-      nebulaGrad.addColorStop(0.5, "rgba(30, 50, 90, 0.02)");
+      nebulaGrad.addColorStop(0, "rgba(60, 40, 120, 0.07)");
+      nebulaGrad.addColorStop(0.5, "rgba(30, 50, 90, 0.04)");
       nebulaGrad.addColorStop(1, "transparent");
       ctx.fillStyle = nebulaGrad;
       ctx.fillRect(0, 0, width, height);
@@ -186,9 +192,44 @@ export default function AmbientBackground() {
         width * 0.75, height * 0.15, 0,
         width * 0.75, height * 0.15, width * 0.35
       );
-      nebulaGrad2.addColorStop(0, "rgba(40, 60, 120, 0.03)");
+      nebulaGrad2.addColorStop(0, "rgba(40, 60, 140, 0.06)");
       nebulaGrad2.addColorStop(1, "transparent");
       ctx.fillStyle = nebulaGrad2;
+      ctx.fillRect(0, 0, width, height);
+
+      // --- Milky Way band ---
+      const milkyWayY = height * 0.4 - currentScroll * 0.08;
+      const milkyGrad = ctx.createLinearGradient(0, milkyWayY - height * 0.2, 0, milkyWayY + height * 0.2);
+      milkyGrad.addColorStop(0, "transparent");
+      milkyGrad.addColorStop(0.3, "rgba(60, 70, 130, 0.025)");
+      milkyGrad.addColorStop(0.5, "rgba(80, 90, 160, 0.04)");
+      milkyGrad.addColorStop(0.7, "rgba(60, 70, 130, 0.025)");
+      milkyGrad.addColorStop(1, "transparent");
+      ctx.save();
+      ctx.translate(width * 0.5, milkyWayY);
+      ctx.rotate(-0.25);
+      ctx.translate(-width * 0.5, -milkyWayY);
+      ctx.fillStyle = milkyGrad;
+      ctx.fillRect(-width * 0.2, milkyWayY - height * 0.25, width * 1.4, height * 0.5);
+      ctx.restore();
+
+      // --- Additional deep-space nebula patches ---
+      const nebulaGrad3 = ctx.createRadialGradient(
+        width * 0.15, height * 0.7, 0,
+        width * 0.15, height * 0.7, width * 0.25
+      );
+      nebulaGrad3.addColorStop(0, "rgba(80, 30, 60, 0.04)");
+      nebulaGrad3.addColorStop(1, "transparent");
+      ctx.fillStyle = nebulaGrad3;
+      ctx.fillRect(0, 0, width, height);
+
+      const nebulaGrad4 = ctx.createRadialGradient(
+        width * 0.85, height * 0.6, 0,
+        width * 0.85, height * 0.6, width * 0.3
+      );
+      nebulaGrad4.addColorStop(0, "rgba(30, 60, 90, 0.035)");
+      nebulaGrad4.addColorStop(1, "transparent");
+      ctx.fillStyle = nebulaGrad4;
       ctx.fillRect(0, 0, width, height);
 
       // --- Trigger random star flare ---
@@ -258,7 +299,9 @@ export default function AmbientBackground() {
         if (s.hue === 0) {
           ctx.fillStyle = `rgba(243, 242, 238, ${finalAlpha})`;
         } else if (s.hue === 220) {
-          ctx.fillStyle = `rgba(190, 210, 255, ${finalAlpha})`;
+          ctx.fillStyle = `rgba(170, 200, 255, ${finalAlpha})`;
+        } else if (s.hue === 350) {
+          ctx.fillStyle = `rgba(255, 180, 180, ${finalAlpha})`;
         } else {
           ctx.fillStyle = `rgba(255, 235, 200, ${finalAlpha})`;
         }

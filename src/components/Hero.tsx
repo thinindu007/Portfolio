@@ -47,12 +47,12 @@ export default function Hero() {
 
           <motion.h2
             initial={{ opacity: 0, y: 10, color: "#6e7bff" }}
-            animate={{ 
-              opacity: 1, 
+            animate={{
+              opacity: 1,
               y: 0,
               color: ["#6e7bff", "#b9bdf7", "#38bdf8", "#6e7bff"]
             }}
-            transition={{ 
+            transition={{
               opacity: { duration: 0.6, delay: 0.25 },
               y: { duration: 0.6, delay: 0.25 },
               color: { duration: 8, repeat: Infinity, ease: "easeInOut" }
@@ -99,7 +99,7 @@ export default function Hero() {
               href="#timeline"
               className="font-mono text-xs tracking-[0.1em] text-ink-muted transition-colors hover:text-ink"
             >
-              2 years / 3 roles / 4 environments →
+              3 years / 3 roles / 4 environments →
             </a>
           </motion.div>
         </div>
