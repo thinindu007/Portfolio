@@ -41,7 +41,7 @@ export default function About() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl font-display text-2xl font-normal leading-snug text-ink md:text-4xl"
         >
-          I build across React, React Native, and Node/Express — shipping
+          I build across React, React Native, and Node/Express - shipping
           mobile apps and the APIs behind them, with the release pipeline treated
           as seriously as the code itself.
         </motion.p>

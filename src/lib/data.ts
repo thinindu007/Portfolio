@@ -4,11 +4,11 @@ export const profile = {
   focus: "Mobile & Full-Stack Systems",
   location: "Colombo, Sri Lanka",
   summary:
-    "Passionate and driven software engineer with a strong focus on mobile and web application development — eager to grow into a full-stack developer by building innovative, user-focused digital solutions.",
+    "Passionate and driven software engineer with a strong focus on mobile and web application development - eager to grow into a full-stack developer by building innovative, user-focused digital solutions.",
   philosophy: [
     {
       title: "Ship through every stage",
-      body: "Real engineering doesn't end at a merged pull request. I've shipped white-label mobile apps end to end — DEV through PROD — owning builds, releases, and the pipelines that carry them there.",
+      body: "Real engineering doesn't end at a merged pull request. I've shipped white-label mobile apps end to end - DEV through PROD - owning builds, releases, and the pipelines that carry them there.",
     },
     {
       title: "Systems over screens",
@@ -28,7 +28,7 @@ export const experience = [
     id: "vs-one-world",
     company: "VS ONE WORLD (Pvt) Ltd",
     role: "Associate Software Engineer",
-    period: "Dec 2025 — Present",
+    period: "Dec 2025 - Present",
     stage: "PROD",
     points: [
       "Working on Odoo ERP development, customizing modules and implementing business workflows.",
@@ -41,15 +41,15 @@ export const experience = [
     company: "Swivel Group",
     link: "swivelgroup.com.au",
     role: "Trainee Software Engineer",
-    period: "May 2023 — Nov 2025",
+    period: "May 2023 - Nov 2025",
     stage: "UAT",
     points: [
-      "Completed a six-month Ignite Program — hands-on with React Native, TypeScript, and Ruby on Rails.",
+      "Completed a six-month Ignite Program - hands-on with React Native, TypeScript, and Ruby on Rails.",
       "Front-End Developer on a real estate project, building and managing white-label mobile applications with React Native.",
       "Owned App Store & Google Play management: client-specific builds, AAB creation, and full deployment processes.",
       "Managed releases across DEV, QA, UAT, and PROD using Fastlane, GitHub Actions, and Firebase App Distribution.",
       "Collaborated with the back-end team implementing and testing new Ruby on Rails features.",
-      "Team Lead, SwivelHack 2023 — built a PWA that predicts sports player injuries and helps athletes secure sponsorships.",
+      "Team Lead, SwivelHack 2023 - built a PWA that predicts sports player injuries and helps athletes secure sponsorships.",
     ],
   },
   {
@@ -57,7 +57,7 @@ export const experience = [
     company: "Topra (Private) Limited",
     link: "Colombo 05",
     role: "Early Career",
-    period: "Sep 2019 — Feb 2021",
+    period: "Sep 2019 - Feb 2021",
     stage: "DEV",
     points: [
       "Gained experience in customer communication, IT product knowledge, and marketing strategy in a professional corporate environment.",
@@ -69,15 +69,15 @@ export const education = [
   {
     id: "westminster",
     institution: "University of Westminster",
-    program: "BSc (Hons) Computer Science, Part-Time",
-    period: "2022 — 2026",
+    program: "BSc (Hons) Computer Science",
+    period: "2022 - 2026",
     note: "Graduated with Second Class Honors (Upper Division).",
   },
   {
     id: "royal-college",
     institution: "Royal College, Colombo 07",
     program: "G.C.E. Ordinary Level & Advanced Level",
-    period: "2006 — 2019",
+    period: "2006 - 2019",
     note: "Completed G.C.E. O/L and A/L examinations.",
   },
 ] as const;
