@@ -22,6 +22,9 @@ export default function MagneticButton({
   const Component = motion(as as "button");
 
   const handleMove = (e: React.MouseEvent) => {
+    // Disable magnetic effect on touch devices to prevent double-tap issues
+    if (window.matchMedia("(hover: none)").matches) return;
+    
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -30,7 +33,10 @@ export default function MagneticButton({
     setPos({ x: x * strength, y: y * strength });
   };
 
-  const handleLeave = () => setPos({ x: 0, y: 0 });
+  const handleLeave = () => {
+    if (window.matchMedia("(hover: none)").matches) return;
+    setPos({ x: 0, y: 0 });
+  };
 
   return (
     <Component

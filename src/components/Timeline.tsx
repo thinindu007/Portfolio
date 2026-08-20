@@ -94,7 +94,7 @@ export default function Timeline() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
-          className="mt-20 grid gap-6 border-t border-obsidian-border pt-14 md:grid-cols-2"
+          className="mt-20 grid gap-6 border-t border-obsidian-border pt-14 pl-10 md:pl-0 md:grid-cols-2"
         >
           {education.map((e) => (
             <div key={e.id}>

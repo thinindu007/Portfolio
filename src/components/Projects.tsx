@@ -7,9 +7,9 @@ import PipelineChip from "./PipelineChip";
 function Marquee({ items }: { items: string[] }) {
   const loop = [...items, ...items];
   return (
-    <div className="relative mt-4 overflow-hidden border-t border-obsidian-border py-3">
+    <div className="relative mt-4 w-full overflow-hidden border-t border-obsidian-border py-3">
       <motion.div
-        className="flex gap-6 whitespace-nowrap font-mono text-[11px] tracking-[0.1em] text-ink-faint"
+        className="flex w-max gap-6 whitespace-nowrap font-mono text-[11px] tracking-[0.1em] text-ink-faint"
         animate={{ x: ["0%", "-50%"] }}
         transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
       >
@@ -61,10 +61,10 @@ export default function Projects() {
               onClick={() => setActive(p)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
+              viewport={{ once: true, margin: "-20px" }}
               transition={{ duration: 0.6, delay: (i % 2) * 0.1 }}
               whileHover={{ y: -4 }}
-              className="group flex flex-col rounded-2xl border border-obsidian-border bg-obsidian-surface/40 p-6 text-left transition-colors hover:border-signal-indigo/50"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-obsidian-border bg-obsidian-surface/40 p-6 text-left transition-colors hover:border-signal-indigo/50"
             >
               <div className="flex items-start justify-between">
                 <span className="font-mono text-xs text-ink-faint">

@@ -8,17 +8,29 @@ const headline = "Building software that ships,";
 const headline2 = "not just software that runs.";
 
 function RevealWord({ children, delay }: { children: string; delay: number }) {
+  const words = children.split(" ");
   return (
-    <span className="inline-block overflow-hidden align-bottom">
-      <motion.span
-        className="inline-block"
-        initial={{ y: "110%" }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {children}&nbsp;
-      </motion.span>
-    </span>
+    <>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className="inline-block overflow-hidden align-bottom mr-[0.2em] last:mr-0"
+        >
+          <motion.span
+            className="inline-block pb-1"
+            initial={{ y: "110%" }}
+            animate={{ y: 0 }}
+            transition={{
+              duration: 0.9,
+              delay: delay + i * 0.04,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </>
   );
 }
 
