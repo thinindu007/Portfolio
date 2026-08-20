@@ -17,14 +17,14 @@ export default function Timeline() {
   const scaleY = useTransform(height, [0, 1], [0, 1]);
 
   return (
-    <section id="timeline" className="relative px-6 py-32 md:px-12">
+    <section id="timeline" className="relative px-6 py-16 md:py-24 md:px-12">
       <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
-          className="mb-16 flex items-center gap-4"
+          className="mb-10 flex items-center gap-4"
         >
           <span className="font-mono text-xs tracking-[0.2em] text-signal-indigo">
             04 / TIMELINE
@@ -37,7 +37,7 @@ export default function Timeline() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
-          className="mb-16 max-w-2xl font-display text-3xl text-ink md:text-4xl"
+          className="mb-10 max-w-2xl font-display text-3xl text-ink md:text-4xl"
         >
           From first internship to production release
         </motion.h2>

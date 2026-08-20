@@ -19,14 +19,14 @@ const item = {
 
 export default function About() {
   return (
-    <section id="about" className="relative px-6 py-32 md:px-12">
-      <div className="mx-auto max-w-5xl">
+    <section id="about" className="relative px-6 py-16 md:py-24 md:px-12">
+      <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.7 }}
-          className="mb-16 flex items-center gap-4"
+          className="mb-10 flex items-center gap-4"
         >
           <span className="font-mono text-xs tracking-[0.2em] text-signal-indigo">
             01 / ABOUT
