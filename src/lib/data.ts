@@ -71,7 +71,7 @@ export const education = [
     institution: "University of Westminster",
     program: "BSc (Hons) Computer Science, Part-Time",
     period: "2022 — 2026",
-    note: "Currently completing final year of studies.",
+    note: "Graduated with Second Class Honors (Upper Division).",
   },
   {
     id: "royal-college",

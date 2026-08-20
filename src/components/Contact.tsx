@@ -78,8 +78,7 @@ export default function Contact() {
               Have a role, a project, or an idea worth building?
             </motion.h2>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-muted">
-              I'm currently finishing my final year at University of
-              Westminster while working full-time — always open to a
+              I have finished my degree with a Second Class Upper while working full-time — always open to a
               conversation about mobile engineering, deployment tooling, or
               full-stack roles.
             </p>
